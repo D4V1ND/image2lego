@@ -42,15 +42,17 @@ These generated artifacts are ignored by git.
 
 - Python 3.10+ recommended
 - Ollama running locally with the `qwen3-vl:8b` model available
-- A Python environment with Flask, Shap-E, PyTorch, LangChain Ollama, NumPy, SciPy, Trimesh, Requests, and python-dotenv
+- Python packages listed in `requirements.txt`
 
-Install the Python dependencies manually:
+Install the Python dependencies:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install flask python-dotenv requests numpy scipy trimesh torch langchain-core langchain-ollama shap-e
+python -m pip install -r requirements.txt
 ```
+
+PyTorch is included in `requirements.txt`, but GPU users may want to install the CUDA-specific PyTorch wheel from the official PyTorch instructions before installing the rest of the dependencies.
 
 Pull the Ollama vision model:
 

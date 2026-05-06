@@ -1,0 +1,10 @@
+flask
+python-dotenv
+requests
+numpy
+scipy
+trimesh
+torch
+langchain-core
+langchain-ollama
+shap-e
