@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sculpt</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: #FAFAFA;
+    color: #3D3D3D;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(0,0,0,0.5) 0%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(0,0,0,0.5) 0%, transparent 70%);
+  }
+  nav, .hero {
+    position: relative;
+    z-index: 1;
+  }
+  .corner-img {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 2;
+    pointer-events: none;
+    width: 200px;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 12px 48px;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    background: rgba(250,250,250,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .nav-logo img {
+    height: 72px;
+  }
+  .nav-title {
+    font-size: 22px;
+    font-weight: 300;
+    color: #3D3D3D;
+    letter-spacing: 0;
+  }
+  .nav-sparkle {
+    font-weight: 300;
+    font-size: 14px;
+    vertical-align: super;
+    margin-left: 1px;
+  }
+
+  /* HERO */
+  .hero {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+    gap: 32px;
+    align-items: center;
+    padding: 116px 48px 48px;
+    min-height: 100vh;
+    width: 100%;
+  }
+  .hero-copy {
+    text-align: left;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 320px;
+  }
+  .hero h1 {
+    font-size: 58px;
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: 0;
+    background: linear-gradient(135deg, #1a1a1a 0%, #555 40%, #1a1a1a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero h1 .accent {
+    background: linear-gradient(135deg, #F472B6, #A78BFA, #38BDF8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .subtitle {
+    font-size: 17px;
+    font-weight: 400;
+    color: #6E6E6E;
+    margin-top: 18px;
+    line-height: 1.5;
+  }
+
+  /* UPLOAD BUTTON */
+  #file-input { display: none; }
+  .upload-btn {
+    margin-top: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #3D3D3D;
+    background: #fff;
+    border: 1px solid #E0E0E0;
+    border-radius: 100px;
+    padding: 14px 32px;
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow 0.3s, border-color 0.3s;
+  }
+  .upload-btn:hover {
+    border-color: #BDBDBD;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+  .upload-btn .icon {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid #6E6E6E;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .upload-btn .icon svg { width: 10px; height: 10px; }
+  .upload-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #4ADE80, #38BDF8, #A78BFA, #F472B6, #FACC15);
+    opacity: 0.7;
+  }
+  .upload-filename {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #9E9E9E;
+    min-height: 18px;
+  }
+
+  /* VIEWERS */
+  .hero-viewers {
+    width: 100%;
+    min-width: 0;
+  }
+  .viewers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .viewer-card {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid #E8E8E8;
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid #F0F0F0;
+  }
+  .viewer-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6E6E6E;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .viewer-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: #F5F5F5;
+    color: #ABABAB;
+    font-weight: 500;
+  }
+  .viewer-canvas-wrap {
+    height: min(56vh, 560px);
+    min-height: 380px;
+    position: relative;
+    background: #F8F8F8;
+  }
+  .viewer-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #C8C8C8;
+    font-size: 13px;
+    gap: 12px;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  @media (max-width: 980px) {
+    nav {
+      padding: 10px 24px;
+    }
+    .nav-logo img {
+      height: 56px;
+    }
+    .hero {
+      grid-template-columns: 1fr;
+      align-items: start;
+      gap: 24px;
+      padding: 92px 24px 40px;
+    }
+    .hero-copy {
+      max-width: none;
+    }
+    .hero h1 {
+      font-size: 44px;
+    }
+    .hero .subtitle {
+      max-width: 520px;
+    }
+    .viewers-grid {
+      grid-template-columns: 1fr;
+    }
+    .viewer-canvas-wrap {
+      height: 340px;
+      min-height: 300px;
+    }
+  }
+  @media (max-width: 560px) {
+    .hero {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .hero h1 {
+      font-size: 38px;
+    }
+    .upload-btn {
+      width: 100%;
+      justify-content: center;
+    }
+    .corner-img {
+      width: 140px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<img src="images/3d-perspective-grid-very-long.svg" class="bg-grid" alt="">
+
+<nav>
+  <a href="#" class="nav-logo"><img src="images/lego_symbol.png" alt="Sculpt"></a>
+</nav>
+
+<section class="hero">
+  <div class="hero-copy">
+    <h1>Photo to <span class="accent">LEGO</span></h1>
+    <p class="subtitle">Upload a photo. Unbox a Lego version of it.</p>
+
+    <input type="file" id="file-input" accept="image/*">
+    <button class="upload-btn" onclick="document.getElementById('file-input').click()">
+      <span class="icon">
+        <svg viewBox="0 0 10 10" fill="none" stroke="#6E6E6E" stroke-width="1.5" stroke-linecap="round">
+          <line x1="5" y1="2" x2="5" y2="8"></line>
+          <line x1="2" y1="5" x2="8" y2="5"></line>
+        </svg>
+      </span>
+      Upload Image
+    </button>
+    <p class="upload-filename" id="upload-filename"></p>
+  </div>
+
+  <div class="hero-viewers">
+    <div class="viewers-grid">
+
+      <div class="viewer-card">
+        <div class="viewer-header">
+          <span class="viewer-title">3D Object</span>
+          <span class="viewer-badge">.OBJ</span>
+        </div>
+        <div class="viewer-canvas-wrap" id="obj-container">
+          <div class="viewer-placeholder" id="obj-placeholder">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="#C0C0C0" stroke-width="1.4">
+              <path d="M18 3L33 11.5V24.5L18 33L3 24.5V11.5L18 3Z"/>
+              <path d="M18 3V33M3 11.5L33 11.5M3 24.5L33 24.5"/>
+            </svg>
+            Awaiting upload
+          </div>
+        </div>
+      </div>
+
+      <div class="viewer-card">
+        <div class="viewer-header">
+          <span class="viewer-title">LEGO Model</span>
+          <span class="viewer-badge">.LDR</span>
+        </div>
+        <div class="viewer-canvas-wrap" id="ldr-container">
+          <div class="viewer-placeholder" id="ldr-placeholder">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="#C0C0C0" stroke-width="1.4">
+              <rect x="4" y="18" width="28" height="14" rx="2"/>
+              <rect x="7" y="10" width="8" height="8" rx="1"/>
+              <rect x="21" y="10" width="8" height="8" rx="1"/>
+              <circle cx="11" cy="14" r="2"/>
+              <circle cx="25" cy="14" r="2"/>
+            </svg>
+            Awaiting upload
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<img src="images/builder_lego_1.png" class="corner-img" alt="">
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { LDrawLoader } from 'three/addons/loaders/LDrawLoader.js';
+
+function createViewer(containerId) {
+  const container = document.getElementById(containerId);
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setClearColor(0x000000, 0);
+  container.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+
+  const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+  camera.position.set(0, 0, 7);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 1.8;
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const key = new THREE.DirectionalLight(0xffffff, 1.2);
+  key.position.set(5, 8, 5);
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.4);
+  fill.position.set(-5, -2, -5);
+  scene.add(fill);
+
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  });
+
+  return { scene, camera, controls, renderer };
+}
+
+// --- OBJ Viewer: spinning torus knot placeholder ---
+const objViewer = createViewer('obj-container');
+document.getElementById('obj-placeholder').style.display = 'none';
+
+const objMesh = new THREE.Mesh(
+  new THREE.TorusKnotGeometry(1.4, 0.45, 160, 20),
+  new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.4, metalness: 0.3 })
+);
+objViewer.scene.add(objMesh);
+
+// --- LDR Viewer: spinning LEGO brick pyramid placeholder ---
+const ldrViewer = createViewer('ldr-container');
+document.getElementById('ldr-placeholder').style.display = 'none';
+
+const legoColors = [0xD01012, 0xF2C913, 0x006DB7, 0x00A850, 0xFF6B35];
+const brickGroup = new THREE.Group();
+
+const layers = [
+  { y: 0.00, grid: [[-1.8,-1.8],[-0.9,-1.8],[0,-1.8],[0.9,-1.8],[1.8,-1.8],
+                     [-1.8,-0.9],[-0.9,-0.9],[0,-0.9],[0.9,-0.9],[1.8,-0.9],
+                     [-1.8, 0.0],[-0.9, 0.0],[0, 0.0],[0.9, 0.0],[1.8, 0.0],
+                     [-1.8, 0.9],[-0.9, 0.9],[0, 0.9],[0.9, 0.9],[1.8, 0.9],
+                     [-1.8, 1.8],[-0.9, 1.8],[0, 1.8],[0.9, 1.8],[1.8, 1.8]] },
+  { y: 0.62, grid: [[-0.9,-0.9],[0,-0.9],[0.9,-0.9],
+                     [-0.9, 0.0],[0, 0.0],[0.9, 0.0],
+                     [-0.9, 0.9],[0, 0.9],[0.9, 0.9]] },
+  { y: 1.24, grid: [[0, 0]] },
+];
+
+layers.forEach(({ y, grid }) => {
+  grid.forEach(([x, z]) => {
+    const color = legoColors[Math.floor(Math.random() * legoColors.length)];
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.05 });
+
+    const brick = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.52, 0.82), mat);
+    brick.position.set(x, y, z);
+    brickGroup.add(brick);
+
+    const stud = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.14, 16), mat);
+    stud.position.set(x, y + 0.33, z);
+    brickGroup.add(stud);
+  });
+});
+
+brickGroup.position.y = -1.0;
+ldrViewer.scene.add(brickGroup);
+
+// Fit camera to fully contain the brick group
+const box = new THREE.Box3().setFromObject(brickGroup);
+const center = box.getCenter(new THREE.Vector3());
+const size = box.getSize(new THREE.Vector3());
+const maxDim = Math.max(size.x, size.y, size.z);
+const fovRad = ldrViewer.camera.fov * (Math.PI / 180);
+const dist = (maxDim / 2) / Math.tan(fovRad / 2) * 2.0;
+ldrViewer.camera.position.set(center.x, center.y + maxDim * 0.3, center.z + dist);
+ldrViewer.controls.target.copy(center);
+ldrViewer.camera.updateProjectionMatrix();
+ldrViewer.controls.update();
+
+function clearDynamicObjects(viewer) {
+  const keep = [];
+  viewer.scene.children.forEach((child) => {
+    if (child.isLight) {
+      keep.push(child);
+    }
+  });
+  viewer.scene.clear();
+  keep.forEach((child) => viewer.scene.add(child));
+}
+
+function frameObject(viewer, object) {
+  const box = new THREE.Box3().setFromObject(object);
+  frameBox(viewer, object, box);
+}
+
+function frameBox(viewer, object, box) {
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z, 1);
+  const distance = maxDim * 1.8;
+
+  object.position.sub(center);
+  viewer.camera.position.set(distance, distance * 0.75, distance);
+  viewer.camera.near = Math.max(distance / 100, 0.01);
+  viewer.camera.far = distance * 100;
+  viewer.camera.updateProjectionMatrix();
+  viewer.controls.target.set(0, 0, 0);
+  viewer.controls.update();
+}
+
+function loadObjModel(url) {
+  const loader = new OBJLoader();
+
+  loader.load(
+    url,
+    (object) => {
+      clearDynamicObjects(objViewer);
+      object.traverse((child) => {
+        if (child.isMesh) {
+          const hasVertexColors = Boolean(child.geometry?.attributes?.color);
+          child.material = new THREE.MeshStandardMaterial({
+            color: hasVertexColors ? 0xffffff : 0x8a8a8a,
+            vertexColors: hasVertexColors,
+            roughness: 0.48,
+            metalness: 0.12,
+            side: THREE.DoubleSide
+          });
+        }
+      });
+      objViewer.scene.add(object);
+      frameObject(objViewer, object);
+    },
+    undefined,
+    (error) => {
+      console.error('OBJ load failed:', error);
+      document.getElementById('upload-filename').textContent = 'OBJ load failed';
+    }
+  );
+}
+
+const ldrawColorValues = {
+  0: '#1B2A34',
+  1: '#1E5AA8',
+  2: '#00852B',
+  3: '#069D9F',
+  4: '#B40000',
+  5: '#D3359D',
+  6: '#543324',
+  7: '#8A928D',
+  8: '#545955',
+  9: '#97CBD9',
+  10: '#58AB41',
+  11: '#00AAA4',
+  12: '#F06D61',
+  13: '#F6A9BB',
+  14: '#FAC80A',
+  15: '#F4F4F4',
+  16: '#FFFFFF',
+  17: '#ADD9A8',
+  18: '#FFD67F',
+  19: '#D7BA8C',
+  20: '#AFBED6',
+  22: '#671F81',
+  23: '#0E3E9A',
+  24: '#7F7F7F',
+  25: '#D67923',
+  26: '#901F76',
+  27: '#A5CA18',
+  28: '#897D62',
+  29: '#FF9ECC',
+  30: '#A06EB9',
+  31: '#CDA4DE',
+  65: '#FAC80A',
+  68: '#FDC382',
+  69: '#8A12A8',
+  70: '#5F3109',
+  71: '#969696',
+  72: '#646464',
+  73: '#7396C8',
+  74: '#7FC475',
+  75: '#000000',
+  76: '#635F61',
+  77: '#FECBCD',
+  78: '#FFC995',
+  79: '#EEEEEE',
+  83: '#0A1327',
+  84: '#AA7D55',
+  85: '#441A91',
+  86: '#7B5D41',
+  89: '#1C58A7',
+  92: '#BB805A',
+  100: '#F9B7A5',
+  110: '#26469A',
+  112: '#4861AC',
+  115: '#B7D425',
+  118: '#9CD6CC',
+  120: '#DEE992',
+  125: '#F9A777',
+  128: '#AD6140',
+  132: '#000000',
+  133: '#000000',
+  134: '#764D3B',
+  135: '#A0A0A0',
+  142: '#DEAC66',
+  147: '#83724F',
+  148: '#484D48',
+  150: '#989B99',
+  151: '#C8C8C8',
+  176: '#945148',
+  178: '#AB673A',
+  179: '#898788',
+  183: '#F6F2DF',
+  187: '#57392C',
+  189: '#AC8247',
+  191: '#FCAC00',
+  212: '#9DC3F7',
+  216: '#8E2B17',
+  218: '#8E5597',
+  219: '#564E9D',
+  226: '#FFEC6C',
+  232: '#77C9D8',
+  256: '#1B2A34',
+  272: '#19325A',
+  273: '#1E5AA8',
+  288: '#00451A',
+  295: '#FF94C2',
+  297: '#AA7F2E',
+  308: '#352100',
+  313: '#ABD9FF',
+  320: '#720012',
+  321: '#469BC3',
+  322: '#68C3E2',
+  323: '#D3F2EA',
+  324: '#B40000',
+  326: '#E2F99A',
+  330: '#77774E',
+  335: '#88605E',
+  350: '#D67923',
+  351: '#F785B1',
+  353: '#FF6D77',
+  366: '#D86D2C',
+  368: '#EDFF21',
+  370: '#755945',
+  371: '#CCA373',
+  373: '#75657D',
+  375: '#8A928D',
+  378: '#708E7C',
+  379: '#70819A',
+  402: '#CA4C0B',
+  406: '#19325A',
+  422: '#915C3C',
+  423: '#543F33',
+  449: '#671F81',
+  450: '#D27844',
+  462: '#F58624',
+  484: '#91501C',
+  490: '#A5CA18',
+  493: '#656761',
+  494: '#D0D0D0',
+  495: '#AE7A59',
+  496: '#969696',
+  503: '#BCB4A5',
+  504: '#898788',
+  507: '#FA9C1C',
+  508: '#CF5127',
+  509: '#CF8A47',
+  510: '#78FC78',
+  511: '#F4F4F4',
+  10000: '#F8F3E4',
+  10002: '#00852B',
+  10010: '#58AB41',
+  10019: '#D7BA8C',
+  10026: '#901F76',
+  10029: '#FF9ECC',
+  10030: '#A06EB9',
+  10031: '#CDA4DE',
+  10070: '#5F3109',
+  10072: '#646464',
+  10073: '#7396C8',
+  10078: '#FFC995',
+  10226: '#FFEC6C',
+  10308: '#352100',
+  10320: '#720012',
+  10321: '#469BC3',
+  10322: '#68C3E2',
+  10323: '#D3F2EA',
+  10378: '#708E7C',
+  10484: '#91501C'
+};
+
+function addBackendLDrawColorDefinitions(text) {
+  const usedCodes = new Set();
+  text.split(/\r?\n/).forEach((line) => {
+    const parts = line.trim().split(/\s+/);
+    if (parts[0] === '1' && parts[1]) {
+      usedCodes.add(Number(parts[1]));
+    }
+  });
+
+  const definitions = [...usedCodes]
+    .filter((code) => Object.prototype.hasOwnProperty.call(ldrawColorValues, code))
+    .map((code) => `0 !COLOUR Backend_${code} CODE ${code} VALUE ${ldrawColorValues[code]} EDGE #333333`)
+    .join('\n');
+
+  return definitions ? `${definitions}\n${text}` : text;
+}
+
+function loadLdrPreview(url) {
+  return new Promise((resolve, reject) => {
+    const loader = new LDrawLoader();
+    loader.setPartsLibraryPath(
+      'https://raw.githubusercontent.com/gkjohnson/ldraw-parts-library/master/complete/ldraw/'
+    );
+
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error('LDR load failed');
+        return response.text();
+      })
+      .then((text) => {
+        const colorizedText = addBackendLDrawColorDefinitions(text);
+        const blobUrl = URL.createObjectURL(new Blob([colorizedText], { type: 'text/plain' }));
+
+        loader.load(
+          blobUrl,
+          (group) => {
+            URL.revokeObjectURL(blobUrl);
+            group.rotation.x = Math.PI; // LDraw Y-axis is inverted vs Three.js
+            clearDynamicObjects(ldrViewer);
+            ldrViewer.scene.add(group);
+            frameObject(ldrViewer, group);
+            resolve();
+          },
+          undefined,
+          (error) => {
+            URL.revokeObjectURL(blobUrl);
+            console.error('LDR load failed:', error);
+            reject(new Error('LDR load failed'));
+          }
+        );
+      })
+      .catch((error) => {
+        console.error('LDR load failed:', error);
+        reject(new Error('LDR load failed'));
+      });
+  });
+}
+
+
+// --- File upload ---
+document.getElementById('file-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const status = document.getElementById('upload-filename');
+  status.textContent = `Uploading ${file.name}...`;
+  document.querySelector('.hero-viewers').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('prompt_type', 'default');
+  formData.append('resolution', '64');
+
+  try {
+    const response = await fetch('/api/image-to-lego', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Image conversion failed');
+    }
+    if (!result.url_obj || !result.url_ldr) {
+      throw new Error('Backend did not return OBJ and LDR URLs');
+    }
+
+    status.textContent = result.prompt || file.name;
+    loadObjModel(result.url_obj);
+    await loadLdrPreview(result.url_ldr);
+  } catch (error) {
+    console.error(error);
+    status.textContent = error.message;
+  }
+});
+</script>
+</body>
+</html>
