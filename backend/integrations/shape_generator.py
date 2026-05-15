@@ -18,6 +18,8 @@ class ShapeGenerator:
     def generate_model(self, prompt: str, guidance_scale: float = 15.0, num_steps: int = 24, seed: int = None) -> dict:
         if not prompt or not prompt.strip(): 
             raise ValueError("Prompt cannot be empty")
+        if not self.api_endpoint:
+            raise RuntimeError("SHAPE_API_URL is not set. Add it to backend/.env before generating models.")
 
         print(f"Generating 3D model for prompt: '{prompt}' with guidance_scale={guidance_scale} and num_steps={num_steps}")
 

@@ -1,6 +1,7 @@
 # shape_server.py
 from flask import Flask, request, send_file
 import torch
+from pathlib import Path
 from shap_e.diffusion.sample import sample_latents
 from shap_e.diffusion.gaussian_diffusion import diffusion_from_config
 from shap_e.models.download import load_model, load_config
@@ -9,11 +10,13 @@ import tempfile, io
 
 app = Flask(__name__)
 
+CACHE_DIR = str(Path(__file__).parent / "shap_e_model_cache")
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device being used for creating shapes: {device}")
-xm = load_model("transmitter", device=device)
-model = load_model("text300M", device=device)
-diffusion = diffusion_from_config(load_config("diffusion"))
+xm = load_model("transmitter", device=device, cache_dir=CACHE_DIR)
+model = load_model("text300M", device=device, cache_dir=CACHE_DIR)
+diffusion = diffusion_from_config(load_config("diffusion", cache_dir=CACHE_DIR))
 
 @app.route("/", methods=["POST"])
 def generate():

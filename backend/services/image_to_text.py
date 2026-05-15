@@ -48,6 +48,7 @@ class ImageToText:
         self.image_parts = [self._encode_image(p) for p in image_paths]
         return f"{len(self.image_parts)} images attached successfully"
     
+    # ===============================================================================================================
     def _call_api(self, parts: list[dict], temperature: float = 0.4, max_tokens: int = 8192):
         self.model_name = ChatOllama(
             model = "qwen3-vl:8b", 

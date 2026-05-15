@@ -2,8 +2,9 @@
 
 import os                          # Lets us read settings from the computer (like environment variables)
 from pathlib import Path           # Makes working with folder/file paths easy — no messy string joining
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, Response, request, jsonify, send_from_directory
 #   Flask             = the web server itself (like opening a restaurant)
+#   Response          = lets us send an empty success response for browser-only requests
 #   request           = reads what the user sent us
 #   jsonify           = turns Python data into JSON to send back
 #   send_from_directory = sends a file to the user (for downloads)
@@ -48,6 +49,11 @@ def serve_frontend():
 @app.route("/images/<filename>")
 def serve_frontend_images(filename):
     return send_from_directory(FRONTEND_DIR / "images", filename)
+
+
+@app.route("/favicon.ico")
+def favicon():
+    return Response(status=204)
 
 
 # ── Step 1a: Generate 3D model from text prompt ───────────────────────────────
