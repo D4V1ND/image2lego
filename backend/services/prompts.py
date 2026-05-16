@@ -3,6 +3,13 @@ Be concise about the main subject of the image. Ignore background details.
 Describe what is the major color throughly. And describe the shape of the main subject in simple terms.
 Keep it under 100 words and at least 50 words for the details."""
 
+# PROMPT_DEFAULT = """
+# Write one paragraph of exactly 70-100 words. Describe only the main subject; NEVER mention the background or
+# surroundings. Cover three things in order: (1) what the object is, (2) its dominant color — be specific (e.g. "deep
+# cobalt blue", not just "blue"), and (3) describe the shape of the main subject in simple and detailed terms. 
+# Include only what is directly visible. Do not infer material, texture, scale, or function unless explicitly shown.
+# """
+
 PROMPT_ENGINEERING = """You are an expert LEGO engineer. Analyze these images of a LEGO model from different angles.
 
 Provide detailed engineering analysis of this LEGO model, focusing on:

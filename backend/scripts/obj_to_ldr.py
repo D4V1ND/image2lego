@@ -169,7 +169,7 @@ def get_lego_color_code(vertex_rgb, lego_colors, lego_hsl):
     vertex_hsl = rgb_to_hsl(vertex_rgb)
     
     # Calculate distances with weights: hue (H) is more important
-    weights = np.array([2.0, 0.5, 0.5])  # Hue x2, Saturation x0.5, Lightness x0.5
+    weights = np.array([4.0, 0.5, 0.5])  # Hue x4: prevents dark-yellow→brown mismatches where L proximity outweighs H gap
     distances = np.sum(weights * np.abs(lego_hsl - vertex_hsl), axis=1)
     
     # Handle hue wraparound (e.g., 0 and 1 are close)
@@ -201,14 +201,12 @@ def assign_colors_to_bricks(brick_layers, mesh):
         (13, [0.9647, 0.6627, 0.7333]), # Pink
         (14, [0.9804, 0.7843, 0.0392]), # Yellow
         (15, [0.9569, 0.9569, 0.9569]), # White
-        (16, [1.0000, 1.0000, 0.5020]), # Main_Colour
         (17, [0.6784, 0.8510, 0.6588]), # Light_Green
         (18, [1.0000, 0.8392, 0.4980]), # Light_Yellow
         (19, [0.8431, 0.7294, 0.5490]), # Tan
         (20, [0.6863, 0.7451, 0.8392]), # Light_Violet
         (22, [0.4039, 0.1216, 0.5059]), # Purple
         (23, [0.0549, 0.2431, 0.6039]), # Dark_Blue_Violet
-        (24, [0.4980, 0.4980, 0.4980]), # Edge_Colour
         (25, [0.8392, 0.4745, 0.1373]), # Orange
         (26, [0.5647, 0.1216, 0.4627]), # Magenta
         (27, [0.6471, 0.7922, 0.0941]), # Lime

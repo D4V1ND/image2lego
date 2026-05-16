@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .prompts import PROMPT_DEFAULT, PROMPT_ENGINEERING, PROMPT_BUILDING, PROMPT_STYLE
 from langchain_core.messages import HumanMessage
-from langchain_ollama import ChatOllama
+from llm_models import model_azure, model_ollama
 
 PROMPTS = {
     "default": PROMPT_DEFAULT,
@@ -50,11 +50,8 @@ class ImageToText:
     
     # ===============================================================================================================
     def _call_api(self, parts: list[dict], temperature: float = 0.4, max_tokens: int = 8192):
-        self.model_name = ChatOllama(
-            model = "qwen3-vl:8b", 
-            temperature=temperature,
-            max_new_tokens=max_tokens
-        )
+        # self.model_name = model_ollama
+        self.model_name = model_azure
 
         message = HumanMessage(content=parts)
         response = self.model_name.invoke([message])
@@ -71,7 +68,7 @@ class ImageToText:
         return self._call_api(parts)
     
     def generate_text(self, prompt: str) -> str: 
-        """Send a plain text prompt to Qwen3-VL without any images attached. Useful for testing text-only prompts."""
+        """Send a plain text prompt to Vision-LLM without any images attached. Useful for testing text-only prompts."""
         parts = [{"type": "text", "text": prompt}]
         return self._call_api(parts)
     
