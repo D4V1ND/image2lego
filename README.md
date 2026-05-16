@@ -1,5 +1,7 @@
 # image2lego
 
+> **Work in progress.** This project is still under active development — things may break or change. If you run into a bug, please open an issue on [GitHub Issues](https://github.com/D4V1ND/image2lego/issues).
+
 Convert an uploaded image into a LEGO-style LDraw model (`.ldr`).
 
 The project uses a vision model to describe the uploaded picture, generates a 3D OBJ from that description with Shap-E, voxelizes the OBJ into LEGO-sized bricks, and writes the result as an LDraw file that can be previewed or opened in LDraw-compatible tools.
