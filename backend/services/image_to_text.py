@@ -25,6 +25,7 @@ class ImageToText:
     def __init__(self, task_type: str = "default"): 
         self.task_type = task_type
         self.image_parts: list[dict] = []
+        self.model_name = model_azure # Change to model_ollama if you want to use Ollama instead of Azure OpenAI
 
     def _get_mime_type(self, file_path: str) -> str: 
         ext = Path(file_path).suffix.lower()
@@ -51,7 +52,6 @@ class ImageToText:
     # ===============================================================================================================
     def _call_api(self, parts: list[dict], temperature: float = 0.4, max_tokens: int = 8192):
         # self.model_name = model_ollama
-        self.model_name = model_azure
 
         message = HumanMessage(content=parts)
         response = self.model_name.invoke([message])

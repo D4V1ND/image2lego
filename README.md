@@ -2,12 +2,12 @@
 
 Convert an uploaded image into a LEGO-style LDraw model (`.ldr`).
 
-The project uses an image model to describe the uploaded picture, generates a 3D OBJ from that description with Shap-E, voxelizes the OBJ into LEGO-sized bricks, and writes the result as an LDraw file that can be previewed or opened in LDraw-compatible tools.
+The project uses a vision model to describe the uploaded picture, generates a 3D OBJ from that description with Shap-E, voxelizes the OBJ into LEGO-sized bricks, and writes the result as an LDraw file that can be previewed or opened in LDraw-compatible tools.
 
 ## What it does
 
 - Upload an image from the browser UI.
-- Convert the image into a text prompt with Ollama (`qwen3-vl:8b`).
+- Convert the image into a text prompt using a vision model (Azure OpenAI GPT-5 or Ollama `qwen3-vl:8b`).
 - Generate a 3D `.obj` model from the prompt with Shap-E.
 - Convert the `.obj` mesh into stacked LEGO bricks.
 - Export an `.ldr` file with LDraw part IDs and LEGO color codes.
@@ -20,7 +20,8 @@ backend/
   main.py                         Flask app and API routes
   shape_server.py                 Local Shap-E model server
   integrations/shape_generator.py Client for the Shap-E server
-  services/image_to_text.py       Image-to-prompt service using Ollama
+  llm_models/models.py            Vision model instances (Azure / Ollama)
+  services/image_to_text.py       Image-to-prompt service
   services/obj_to_lego.py         OBJ/STL to LDR orchestration
   services/ldr_parser.py          LDR layer parser for the frontend
   scripts/obj_to_ldr.py           Mesh voxelization and LDraw writer
@@ -38,11 +39,24 @@ Generated files are written to:
 
 These generated artifacts are ignored by git.
 
+## Vision model
+
+The image-to-prompt step supports two backends, configured in `backend/llm_models/models.py`:
+
+| Model | Provider | When to use |
+|---|---|---|
+| `gpt-5` | Azure OpenAI | Best quality; requires Azure credentials |
+| `qwen3-vl:8b` | Ollama (local) | Runs fully offline; no API key needed |
+
+To switch between them, edit line 28 of `backend/services/image_to_text.py` and uncomment the desired model:
+
 ## Requirements
 
-- Python 3.10+ recommended
-- Ollama running locally with the `qwen3-vl:8b` model available
+- Python 3.10+
 - Python packages listed in `requirements.txt`
+- One of the following vision model setups:
+  - **Azure OpenAI** — an Azure deployment of GPT-5 (see Configuration below)
+  - **Ollama** — running locally with `qwen3-vl:8b` pulled
 
 Install the Python dependencies:
 
@@ -54,7 +68,7 @@ python -m pip install -r requirements.txt
 
 PyTorch is included in `requirements.txt`, but GPU users may want to install the CUDA-specific PyTorch wheel from the official PyTorch instructions before installing the rest of the dependencies.
 
-Pull the Ollama vision model:
+To use Ollama locally, pull the vision model:
 
 ```powershell
 ollama pull qwen3-vl:8b
@@ -67,6 +81,15 @@ Create a `.env` file in the project root:
 ```env
 FLASK_PORT=5000
 SHAPE_API_URL=http://127.0.0.1:8000/
+```
+
+For **Azure OpenAI**, add your deployment credentials:
+
+```env
+AZURE_OPENAI_API_KEY=your_api_key
+AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
+AZURE_OPENAI_VERSION=2024-02-01
+AZURE_OPENAI_DEPLOYMENT_NAME=your_deployment_name
 ```
 
 `PYTHON_PATH` is optional. If omitted, the backend uses the current Python interpreter.
@@ -95,7 +118,7 @@ Open the app at:
 http://127.0.0.1:5000/
 ```
 
-Upload an image. The backend will create an OBJ model, convert it to an LDR LEGO model, and return URLs for the generated files.
+Upload an image. The backend will generate a 3D OBJ, convert it to an LDR LEGO model, and return URLs for the generated files.
 
 ## API
 
@@ -168,7 +191,7 @@ You can run the converter script directly:
 python backend\scripts\obj_to_ldr.py backend\models\model.obj backend\ldr_output\model.ldr 64
 ```
 
-The converter rescales the mesh, voxelizes it, fills interior layers, places common LEGO brick sizes, maps colors to LDraw color codes, and writes an `.ldr` file.
+The converter rescales the mesh, voxelizes it, fills interior layers, places common LEGO brick sizes, maps vertex colors to LDraw color codes, and writes an `.ldr` file.
 
 ## Notes
 

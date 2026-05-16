@@ -7,4 +7,5 @@ trimesh
 torch
 langchain-core
 langchain-ollama
+langchain-openai
 shap-e
